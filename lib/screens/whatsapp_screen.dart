@@ -40,6 +40,7 @@ class _WhatsappScreenState extends State<WhatsappScreen> {
               itemBuilder: (context, index) {
                 final qrCode = state.qrCodes[index];
                 return qrCard(
+                  image:'assets/logos/whatsapp_logo.png',
                   qrCode: qrCode,
                   index: index,
                   context: context,

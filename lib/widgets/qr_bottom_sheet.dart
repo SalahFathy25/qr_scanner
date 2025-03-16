@@ -107,8 +107,8 @@ void qrBottomSheet({
                         labelText: 'WhatsApp Number',
                         hintText: 'Enter your WhatsApp Number',
                       ),
-                      controller: dataController,
                       initialCountryCode: 'EG',
+                      initialValue: isEditing ? existingData : null,
                       onChanged: (phone) {
                         dataController.text = phone.completeNumber;
                       },
