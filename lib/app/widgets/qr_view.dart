@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:qr_code/models/qr_code_model.dart';
+import 'package:qr_code/app/models/qr_code_model.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -8,6 +8,7 @@ Future<dynamic> qrView(
   BuildContext context,
   QrCodeModel qrCode,
   Uri whatsappLink,
+  Color qrColor,
 ) {
   return showDialog(
     context: context,
@@ -40,7 +41,6 @@ Future<dynamic> qrView(
                       ),
                     ),
                   ),
-                  SizedBox(width: 5),
                   IconButton(
                     icon: const Icon(Icons.copy, color: Colors.grey),
                     onPressed: () {
@@ -59,7 +59,7 @@ Future<dynamic> qrView(
             height: MediaQuery.of(context).size.width * 0.8,
             child: Center(
               child: QrImageView(
-                foregroundColor: Colors.green,
+                foregroundColor: qrColor,
                 eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.circle),
                 data: 'https://wa.me/${qrCode.data}',
                 version: QrVersions.auto,

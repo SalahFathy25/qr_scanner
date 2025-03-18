@@ -1,13 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:qr_code/cubit/qr_cubit.dart';
-import 'package:qr_code/screens/facebook_screen.dart';
-import 'package:qr_code/screens/instagram_screen.dart';
-import 'package:qr_code/screens/linkedin_screen.dart';
-import 'package:qr_code/screens/whatsapp_screen.dart';
-import 'package:qr_code/widgets/custom_home_button.dart';
-import 'package:qr_code/screens/scan_qr_code.dart';
+import 'package:qr_code/app/cubit/qr_cubit.dart';
+import 'package:qr_code/app/screens/social_media_screens/facebook_screen.dart';
+import 'package:qr_code/app/screens/social_media_screens/instagram_screen.dart';
+import 'package:qr_code/app/screens/social_media_screens/linkedin_screen.dart';
+import 'package:qr_code/app/screens/social_media_screens/whatsapp_screen.dart';
+import 'package:qr_code/app/widgets/custom_home_button.dart';
+import 'package:qr_code/app/screens/scan_qr_code.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});
@@ -17,6 +17,7 @@ class Home extends StatelessWidget {
     return BlocProvider(
       create: (context) => QrCubit(),
       child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           title: const Text(
             "QR Code Generator",
@@ -59,7 +60,12 @@ class Home extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    CupertinoPageRoute(builder: (context) => FacebookScreen()),
+                    CupertinoPageRoute(
+                      builder:
+                          (context) => FacebookScreen(
+                            appbarTitle: 'Facebook Generate QR Code',
+                          ),
+                    ),
                   );
                 },
                 title: 'Facebook Generate QR Code',
@@ -71,7 +77,12 @@ class Home extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    CupertinoPageRoute(builder: (context) => InstagramScreen()),
+                    CupertinoPageRoute(
+                      builder:
+                          (context) => InstagramScreen(
+                            appbarTitle: 'instagram Generate QR Code',
+                          ),
+                    ),
                   );
                 },
                 title: 'instagram Generate QR Code',
@@ -83,7 +94,12 @@ class Home extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    CupertinoPageRoute(builder: (context) => LinkedinScreen()),
+                    CupertinoPageRoute(
+                      builder:
+                          (context) => LinkedinScreen(
+                            appbarTitle: 'linkedin Generate QR Code',
+                          ),
+                    ),
                   );
                 },
                 title: 'linkedin Generate QR Code',

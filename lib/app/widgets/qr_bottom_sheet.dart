@@ -5,10 +5,12 @@ import '../cubit/qr_cubit.dart';
 
 void qrBottomSheet({
   required BuildContext context,
+  required String screenName,
   String? existingTitle,
   String? existingData,
   int? index,
-  required bool iswhatsapp,
+  bool iswhatsapp = false,
+  required Color buttonColor,
 }) {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController dataController = TextEditingController();
@@ -48,7 +50,13 @@ void qrBottomSheet({
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    FilledButton(
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: buttonColor,
+                        foregroundColor: Colors.white,
+                        minimumSize: Size(70, 30),
+                        alignment: Alignment.center,
+                      ),
                       onPressed: () {
                         if (titleController.text.isEmpty ||
                             dataController.text.isEmpty) {
@@ -57,14 +65,16 @@ void qrBottomSheet({
 
                         if (isEditing) {
                           context.read<QrCubit>().updateQrCode(
-                            index!,
-                            titleController.text,
+                            index!.toString(),
+                            int.tryParse(titleController.text) ?? 0,
                             dataController.text,
+                            screenName,
                           );
                         } else {
                           context.read<QrCubit>().addQrCode(
                             titleController.text,
                             dataController.text,
+                            screenName,
                           );
                         }
 
@@ -94,7 +104,7 @@ void qrBottomSheet({
                 SizedBox(height: 15),
 
                 Text(
-                  "Enter Data",
+                  iswhatsapp ? "Enter WhatsApp Number" : "Enter Data",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 5),
@@ -119,8 +129,8 @@ void qrBottomSheet({
                           borderRadius: BorderRadius.circular(15),
                         ),
                         prefixIcon: Icon(Icons.qr_code),
-                        hintText: 'Enter your Whatsapp Number',
-                        labelText: 'Whatsapp Number',
+                        hintText: 'Enter Data',
+                        labelText: 'Data',
                       ),
                       controller: dataController,
                     ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:qr_code/cubit/qr_cubit.dart';
+import 'package:qr_code/app/cubit/qr_cubit.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../models/qr_code_model.dart';
@@ -8,16 +8,18 @@ import 'qr_view.dart';
 
 Widget qrCard({
   required QrCodeModel qrCode,
+  required String screenName,
   required int index,
   required BuildContext context,
   required Function({String? existingTitle, String? existingData, int? index})
   qrBottomSheet,
   required String image,
+  required Color qrColor,
 }) {
   return Dismissible(
     key: UniqueKey(),
     onDismissed: (_) {
-      context.read<QrCubit>().deleteQrCode(index);
+      context.read<QrCubit>().deleteQrCode(screenName, index);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('QR code deleted')));
@@ -37,7 +39,7 @@ Widget qrCard({
           title: Text(qrCode.title),
           subtitle: Text(qrCode.data),
           trailing: QrImageView(
-            foregroundColor: Colors.green,
+            foregroundColor: qrColor,
             eyeStyle: QrEyeStyle(eyeShape: QrEyeShape.circle),
             data: qrCode.data,
             version: QrVersions.auto,
@@ -51,8 +53,8 @@ Widget qrCard({
             );
           },
           onTap: () async {
-            final Uri whatsappLink = Uri.parse('https://wa.me/${qrCode.data}}');
-            qrView(context, qrCode, whatsappLink);
+            final Uri whatsappLink = Uri.parse('https://wa.me/${qrCode.data}');
+            qrView(context, qrCode, whatsappLink, Colors.green);
           },
         ),
       ),
