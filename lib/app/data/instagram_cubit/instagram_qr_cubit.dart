@@ -8,7 +8,7 @@ import '../../models/qr_code_model.dart';
 part 'instagram_qr_state.dart';
 
 class InstagramQrCubit extends Cubit<InstagramQrState> {
-  static const String _qrCodesKey = 'qr_codes';
+  static const String _qrCodesKey = 'instagram_qr_codes';
 
   InstagramQrCubit() : super(InstagramQrInitial()) {
     _loadQrCodes();

@@ -8,7 +8,7 @@ import '../../models/qr_code_model.dart';
 part 'linkedin_qr_state.dart';
 
 class LinkedinQrCubit extends Cubit<LinkedinQrState> {
-  static const String _qrCodesKey = 'qr_codes';
+  static const String _qrCodesKey = 'linked_in_qr_codes';
 
   LinkedinQrCubit() : super(LinkedinQrInitial()) {
     _loadQrCodes();

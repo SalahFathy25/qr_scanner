@@ -6,7 +6,7 @@ import '../../models/qr_code_model.dart';
 part 'facebook_qr_state.dart';
 
 class FacebookQrCubit extends Cubit<FacebookQrState> {
-  static const String _qrCodesKey = 'qr_codes';
+  static const String _qrCodesKey = 'facebook_qr_codes';
 
   FacebookQrCubit() : super(FacebookQrInitial()) {
     _loadQrCodes();

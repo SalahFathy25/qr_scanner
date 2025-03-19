@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 part 'whatsapp_qr_state.dart';
 
 class WhatsappQrCubit extends Cubit<WhatsappQrState> {
-  static const String _qrCodesKey = 'qr_codes';
+  static const String _qrCodesKey = 'whatsapp_qr_codes';
 
   WhatsappQrCubit() : super(WhatsappQrInitial()) {
     _loadQrCodes();
