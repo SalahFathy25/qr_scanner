@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:qr_code/app/data/whatsapp_cubit/whatsapp_qr_cubit.dart';
 import 'package:qr_code/app/screens/home.dart';
 import 'package:qr_code/core/utils/theme/theme.dart';
 
