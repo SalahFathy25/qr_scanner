@@ -15,7 +15,7 @@ void qrBottomSheet({
   bool isEditing = existingTitle != null;
 
   if (isEditing) {
-    titleController.text = existingTitle!;
+    titleController.text = existingTitle;
     dataController.text = existingData!;
   }
 

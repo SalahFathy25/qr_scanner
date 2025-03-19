@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../models/qr_code_model.dart';
-import 'qr_view.dart';
 
 Widget qrCard<T extends Cubit>({
   required QrCodeModel qrCode,
@@ -52,10 +51,6 @@ Widget qrCard<T extends Cubit>({
               index: index,
             );
           },
-          // onTap: () async {
-          //   final Uri whatsappLink = Uri.parse('https://wa.me/${qrCode.data}');
-          //   qrView(context, qrCode, whatsappLink, Colors.green, true);
-          // },
           onTap: onTapped,
         ),
       ),

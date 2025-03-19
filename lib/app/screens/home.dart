@@ -46,8 +46,11 @@ class Home extends StatelessWidget {
               onPressed:
                   () => navigateTo(
                     context,
-                    const WhatsappScreen(
-                      appbarTitle: 'Whatsapp Generate QR Code',
+                    BlocProvider(
+                      create: (context) => WhatsappQrCubit(),
+                      child: const WhatsappScreen(
+                        appbarTitle: 'Whatsapp Generate QR Code',
+                      ),
                     ),
                   ),
               title: 'Whatsapp Generate QR Code',
