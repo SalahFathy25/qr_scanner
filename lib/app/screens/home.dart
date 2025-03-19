@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qr_code/app/data/facebook_cubit/facebook_qr_cubit.dart';
+import 'package:qr_code/app/data/instagram_cubit/instagram_qr_cubit.dart';
+import 'package:qr_code/app/data/linkedin_cubit/linkedin_qr_cubit.dart';
 import 'package:qr_code/app/data/whatsapp_cubit/whatsapp_qr_cubit.dart';
 import 'package:qr_code/app/screens/social_media_screens/facebook_screen.dart';
 import 'package:qr_code/app/screens/social_media_screens/instagram_screen.dart';
@@ -80,15 +82,18 @@ class Home extends StatelessWidget {
               context,
               image: 'assets/logos/instagram_logo.png',
               onPressed: () {
-                // Navigator.push(
-                //   context,
-                //   CupertinoPageRoute(
-                //     builder:
-                //         (context) => InstagramScreen(
-                //           appbarTitle: 'instagram Generate QR Code',
-                //         ),
-                //   ),
-                // );
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                    builder:
+                        (context) => BlocProvider(
+                          create: (context) => InstagramQrCubit(),
+                          child: InstagramScreen(
+                            appbarTitle: 'instagram Generate QR Code',
+                          ),
+                        ),
+                  ),
+                );
               },
               title: 'instagram Generate QR Code',
             ),
@@ -97,15 +102,18 @@ class Home extends StatelessWidget {
               context,
               image: 'assets/logos/linkedin_logo.png',
               onPressed: () {
-                // Navigator.push(
-                //   context,
-                //   CupertinoPageRoute(
-                //     builder:
-                //         (context) => LinkedinScreen(
-                //           appbarTitle: 'linkedin Generate QR Code',
-                //         ),
-                //   ),
-                // );
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                    builder:
+                        (context) => BlocProvider(
+                          create: (context) => LinkedinQrCubit(),
+                          child: LinkedinScreen(
+                            appbarTitle: 'linkedin Generate QR Code',
+                          ),
+                        ),
+                  ),
+                );
               },
               title: 'linkedin Generate QR Code',
             ),
