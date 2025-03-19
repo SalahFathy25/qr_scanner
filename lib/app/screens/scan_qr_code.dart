@@ -41,17 +41,18 @@ class _ScanQrCodeState extends State<ScanQrCode> {
         String qrCode = scanData.code!;
         Uri? qrUri = Uri.tryParse(qrCode);
 
-        if (qrUri != null && (qrUri.scheme == 'http' || qrUri.scheme == 'https')) {
-          // If valid URL, launch immediately
+        if (qrUri != null &&
+            (qrUri.scheme == 'http' || qrUri.scheme == 'https')) {
           if (await canLaunchUrl(qrUri)) {
             await launchUrl(qrUri);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Center(child: Text("Could not open link"))),
+              const SnackBar(
+                content: Center(child: Text("Could not open link")),
+              ),
             );
           }
         } else {
-          // If not a URL, show QR dialog
           _showQRDialog(qrCode);
         }
       }
@@ -60,7 +61,7 @@ class _ScanQrCodeState extends State<ScanQrCode> {
 
   Future<void> _showQRDialog(String qrCode) async {
     setState(() => isDialogOpen = true);
-    
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -79,7 +80,11 @@ class _ScanQrCodeState extends State<ScanQrCode> {
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 2,
-                      style: const TextStyle(fontSize: 15, color: Colors.blue, decoration: TextDecoration.underline),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                   IconButton(
@@ -87,7 +92,9 @@ class _ScanQrCodeState extends State<ScanQrCode> {
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: qrCode));
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Center(child: Text("Copied to clipboard"))),
+                        const SnackBar(
+                          content: Center(child: Text("Copied to clipboard")),
+                        ),
                       );
                     },
                   ),
