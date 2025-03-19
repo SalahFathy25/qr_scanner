@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:qr_code/app/cubit/qr_cubit.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../models/qr_code_model.dart';
 import 'qr_view.dart';
 
-Widget qrCard({
+Widget qrCard<T extends Cubit>({
   required QrCodeModel qrCode,
-  required String screenName,
   required int index,
   required BuildContext context,
   required Function({String? existingTitle, String? existingData, int? index})
   qrBottomSheet,
   required String image,
   required Color qrColor,
+  required void Function() onDismissed,
+  required void Function() onTapped,
 }) {
   return Dismissible(
     key: UniqueKey(),
     onDismissed: (_) {
-      context.read<QrCubit>().deleteQrCode(screenName, index);
+      onDismissed();
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('QR code deleted')));
@@ -52,10 +52,11 @@ Widget qrCard({
               index: index,
             );
           },
-          onTap: () async {
-            final Uri whatsappLink = Uri.parse('https://wa.me/${qrCode.data}');
-            qrView(context, qrCode, whatsappLink, Colors.green);
-          },
+          // onTap: () async {
+          //   final Uri whatsappLink = Uri.parse('https://wa.me/${qrCode.data}');
+          //   qrView(context, qrCode, whatsappLink, Colors.green, true);
+          // },
+          onTap: onTapped,
         ),
       ),
     ),

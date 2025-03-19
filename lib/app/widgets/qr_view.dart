@@ -7,9 +7,17 @@ import 'package:url_launcher/url_launcher.dart';
 Future<dynamic> qrView(
   BuildContext context,
   QrCodeModel qrCode,
-  Uri whatsappLink,
   Color qrColor,
+  bool isWhatsapp,
 ) {
+  final String displayedLink =
+      isWhatsapp ? 'https://wa.me/${qrCode.data}' : qrCode.data;
+
+  String shortenedLink =
+      displayedLink.length > 25
+          ? '${displayedLink.substring(0, 27)}...'
+          : displayedLink;
+
   return showDialog(
     context: context,
     builder:
@@ -17,25 +25,23 @@ Future<dynamic> qrView(
           title: Column(
             children: [
               Text(qrCode.title, textAlign: TextAlign.center),
-              Row(
+              Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   GestureDetector(
                     onTap: () async {
-                      if (await canLaunch(whatsappLink.toString())) {
-                        await launchUrl(whatsappLink);
+                      if (await canLaunch(displayedLink)) {
+                        await launchUrl(Uri.parse(displayedLink));
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Could not open WhatsApp link'),
-                          ),
+                          const SnackBar(content: Text('Could not open link')),
                         );
                       }
                     },
                     child: Text(
-                      'wa.me/${qrCode.data}',
+                      shortenedLink,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.blue,
                         decoration: TextDecoration.underline,
                       ),
@@ -44,7 +50,7 @@ Future<dynamic> qrView(
                   IconButton(
                     icon: const Icon(Icons.copy, color: Colors.grey),
                     onPressed: () {
-                      Clipboard.setData(ClipboardData(text: '$whatsappLink'));
+                      Clipboard.setData(ClipboardData(text: displayedLink));
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Copied to clipboard')),
                       );
@@ -61,7 +67,7 @@ Future<dynamic> qrView(
               child: QrImageView(
                 foregroundColor: qrColor,
                 eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.circle),
-                data: 'https://wa.me/${qrCode.data}',
+                data: displayedLink,
                 version: QrVersions.auto,
                 size: MediaQuery.of(context).size.width * 0.6,
               ),

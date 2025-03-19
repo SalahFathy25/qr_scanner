@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:qr_code/app/cubit/qr_cubit.dart';
+import 'package:qr_code/app/data/whatsapp_cubit/whatsapp_qr_cubit.dart';
 import 'package:qr_code/app/widgets/no_qr.dart';
 import 'package:qr_code/app/widgets/qr_bottom_sheet.dart';
-
 import '../../widgets/qr_card.dart';
+import '../../widgets/qr_view.dart';
 
 class WhatsappScreen extends StatefulWidget {
   const WhatsappScreen({super.key, required this.appbarTitle});
@@ -15,9 +15,53 @@ class WhatsappScreen extends StatefulWidget {
 }
 
 class _WhatsappScreenState extends State<WhatsappScreen> {
-  String qrData = "";
   bool isEditing = false;
   int? editingIndex;
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController dataController = TextEditingController();
+
+  void openQrBottomSheet({
+    String? existingTitle,
+    String? existingData,
+    int? index,
+  }) {
+    setState(() {
+      isEditing = index != null;
+      editingIndex = index;
+
+      titleController.text = existingTitle ?? '';
+      dataController.text = existingData ?? '';
+    });
+
+    qrBottomSheet(
+      context: context,
+      titleController: titleController,
+      dataController: dataController,
+      existingTitle: existingTitle,
+      existingData: existingData,
+      index: index,
+      iswhatsapp: true,
+      buttonColor: const Color(0xff33D951),
+      onPressed: () {
+        if (titleController.text.isEmpty || dataController.text.isEmpty) return;
+
+        if (isEditing) {
+          context.read<WhatsappQrCubit>().updateQrCode(
+            editingIndex!,
+            titleController.text,
+            dataController.text,
+          );
+        } else {
+          context.read<WhatsappQrCubit>().addQrCode(
+            titleController.text,
+            dataController.text,
+          );
+        }
+
+        Navigator.pop(context);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,27 +72,20 @@ class _WhatsappScreenState extends State<WhatsappScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
-          color: AppBarTheme.of(context).iconTheme?.color ?? Colors.white,
         ),
         title: Text(widget.appbarTitle),
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed:
-                () => qrBottomSheet(
-                  context: context,
-                  iswhatsapp: true,
-                  buttonColor: Colors.green,
-                  screenName: 'WhatsApp',
-                ),
+            onPressed: () => openQrBottomSheet(),
             icon: const Icon(Icons.add, size: 30),
           ),
         ],
       ),
-      body: BlocBuilder<QrCubit, QrState>(
+      body: BlocBuilder<WhatsappQrCubit, WhatsappQrState>(
         builder: (context, state) {
-          if (state is QrSuccess) {
-            final whatsappQrCodes = state.qrCodesByScreen["WhatsApp"] ?? [];
+          if (state is WhatsappQrSuccess) {
+            final whatsappQrCodes = state.qrCodes;
             if (whatsappQrCodes.isEmpty) return noQr();
 
             return ListView.builder(
@@ -56,21 +93,21 @@ class _WhatsappScreenState extends State<WhatsappScreen> {
               itemBuilder: (context, index) {
                 final qrCode = whatsappQrCodes[index];
                 return qrCard(
-                  screenName: 'WhatsApp',
                   image: 'assets/logos/whatsapp_logo.png',
+                  onTapped: () {
+                    qrView(context, qrCode, Colors.green, true);
+                  },
+                  onDismissed:
+                      () => context.read<WhatsappQrCubit>().deleteQrCode(index),
                   qrCode: qrCode,
-                  qrColor: Color(0xff33D951),
+                  qrColor: const Color(0xff33D951),
                   index: index,
                   context: context,
                   qrBottomSheet: ({existingTitle, existingData, index}) {
-                    qrBottomSheet(
-                      context: context,
+                    openQrBottomSheet(
                       existingTitle: existingTitle,
                       existingData: existingData,
-                      screenName: 'WhatsApp',
                       index: index,
-                      iswhatsapp: true,
-                      buttonColor: Color(0xff33D951),
                     );
                   },
                 );
