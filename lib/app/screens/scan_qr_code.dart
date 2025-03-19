@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
@@ -33,58 +32,54 @@ class _ScanQrCodeState extends State<ScanQrCode> {
 
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
-    controller.scannedDataStream.listen((scanData) {
+    controller.scannedDataStream.listen((scanData) async {
       if (!isDialogOpen && (result == null || result!.code != scanData.code)) {
         setState(() {
           result = scanData;
         });
-        _showQRDialog(scanData.code!);
+
+        String qrCode = scanData.code!;
+        Uri? qrUri = Uri.tryParse(qrCode);
+
+        if (qrUri != null && (qrUri.scheme == 'http' || qrUri.scheme == 'https')) {
+          // If valid URL, launch immediately
+          if (await canLaunchUrl(qrUri)) {
+            await launchUrl(qrUri);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Center(child: Text("Could not open link"))),
+            );
+          }
+        } else {
+          // If not a URL, show QR dialog
+          _showQRDialog(qrCode);
+        }
       }
     });
   }
 
   Future<void> _showQRDialog(String qrCode) async {
     setState(() => isDialogOpen = true);
-    Uri qrLink = Uri.parse(qrCode);
-
+    
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          title: Column(
+          title: const Text("QR Code Scanned", textAlign: TextAlign.center),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                "QR Code Scanned",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  GestureDetector(
-                    onTap: () async {
-                      if (await canLaunchUrl(qrLink)) {
-                        await launchUrl(qrLink);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Center(child: Text("Could not open link")),
-                          ),
-                        );
-                      }
-                    },
+                  Expanded(
                     child: Text(
                       qrCode,
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
-                      ),
+                      maxLines: 2,
+                      style: const TextStyle(fontSize: 15, color: Colors.blue, decoration: TextDecoration.underline),
                     ),
                   ),
                   IconButton(
@@ -92,28 +87,21 @@ class _ScanQrCodeState extends State<ScanQrCode> {
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: qrCode));
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Center(child: Text("Copied to clipboard")),
-                        ),
+                        const SnackBar(content: Center(child: Text("Copied to clipboard"))),
                       );
                     },
                   ),
                 ],
               ),
-            ],
-          ),
-          content: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.8,
-            height: MediaQuery.of(context).size.width * 0.8,
-            child: Center(
-              child: QrImageView(
+              const SizedBox(height: 10),
+              QrImageView(
                 foregroundColor: Colors.black,
                 eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.circle),
                 data: qrCode,
                 version: QrVersions.auto,
-                size: MediaQuery.of(context).size.width * 0.6,
+                size: 200,
               ),
-            ),
+            ],
           ),
           actions: [
             TextButton(
@@ -122,7 +110,7 @@ class _ScanQrCodeState extends State<ScanQrCode> {
                 setState(() => isDialogOpen = false);
                 controller?.resumeCamera();
               },
-              child: Text("OK"),
+              child: const Text("OK"),
             ),
           ],
         );
@@ -133,7 +121,7 @@ class _ScanQrCodeState extends State<ScanQrCode> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Scan QR Code'), centerTitle: true),
+      appBar: AppBar(title: const Text('Scan QR Code'), centerTitle: true),
       body: Column(
         children: [
           Expanded(
