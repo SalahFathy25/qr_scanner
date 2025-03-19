@@ -12,8 +12,6 @@ Widget customHomeButton(
     child: ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
         fixedSize: Size(MediaQuery.sizeOf(context).width * 0.8, 80),
       ),
       child: Row(
