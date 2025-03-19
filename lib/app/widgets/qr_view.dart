@@ -13,11 +13,6 @@ Future<dynamic> qrView(
   final String displayedLink =
       isWhatsapp ? 'https://wa.me/${qrCode.data}' : qrCode.data;
 
-  String shortenedLink =
-      displayedLink.length > 25
-          ? '${displayedLink.substring(0, 27)}...'
-          : displayedLink;
-
   return showDialog(
     context: context,
     builder:
@@ -25,7 +20,7 @@ Future<dynamic> qrView(
           title: Column(
             children: [
               Text(qrCode.title, textAlign: TextAlign.center),
-              Column(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   GestureDetector(
@@ -39,10 +34,11 @@ Future<dynamic> qrView(
                       }
                     },
                     child: Text(
-                      shortenedLink,
+                      displayedLink,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.blue,
+                        fontSize: 15,
                         decoration: TextDecoration.underline,
                       ),
                     ),

@@ -37,6 +37,7 @@ class Home extends StatelessWidget {
           ),
         ],
       ),
+
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -89,13 +90,13 @@ class Home extends StatelessWidget {
                         (context) => BlocProvider(
                           create: (context) => InstagramQrCubit(),
                           child: InstagramScreen(
-                            appbarTitle: 'instagram Generate QR Code',
+                            appbarTitle: 'Instagram Generate QR Code',
                           ),
                         ),
                   ),
                 );
               },
-              title: 'instagram Generate QR Code',
+              title: 'Instagram Generate QR Code',
             ),
 
             customHomeButton(
@@ -109,16 +110,25 @@ class Home extends StatelessWidget {
                         (context) => BlocProvider(
                           create: (context) => LinkedinQrCubit(),
                           child: LinkedinScreen(
-                            appbarTitle: 'linkedin Generate QR Code',
+                            appbarTitle: 'LinkedIn Generate QR Code',
                           ),
                         ),
                   ),
                 );
               },
-              title: 'linkedin Generate QR Code',
+              title: 'LinkedIn Generate QR Code',
             ),
+
             Spacer(),
-            Text('Made With Salah'),
+            Text(
+              'Made with ❤️ by Salah',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.bodyLarge!.color,
+              ),
+            ),
+            SizedBox(height: 10),
           ],
         ),
       ),

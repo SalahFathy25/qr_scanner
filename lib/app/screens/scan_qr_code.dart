@@ -76,12 +76,15 @@ class _ScanQrCodeState extends State<ScanQrCode> {
                     child: Text(
                       qrCode,
                       textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                       style: TextStyle(
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
+                      fontSize: 15,
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
                       ),
                     ),
-                  ),
+                    ),
                   IconButton(
                     icon: const Icon(Icons.copy, color: Colors.grey),
                     onPressed: () {
@@ -137,21 +140,7 @@ class _ScanQrCodeState extends State<ScanQrCode> {
             flex: 1,
             child: Center(
               child:
-                  (result != null)
-                      ? Text(
-                        'Data: ${result!.code}',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )
-                      : Text(
-                        'QR Content Here',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                  Text('Scan a QR code', style: Theme.of(context).textTheme.headlineMedium),
             ),
           ),
         ],
