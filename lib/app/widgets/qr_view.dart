@@ -29,7 +29,9 @@ Future<dynamic> qrView(
                         await launchUrl(Uri.parse(displayedLink));
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Could not open link')),
+                          const SnackBar(
+                            content: Center(child: Text('Could not open link')),
+                          ),
                         );
                       }
                     },
@@ -48,7 +50,9 @@ Future<dynamic> qrView(
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: displayedLink));
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Copied to clipboard')),
+                        const SnackBar(
+                          content: Center(child: Text('Copied to clipboard')),
+                        ),
                       );
                     },
                   ),

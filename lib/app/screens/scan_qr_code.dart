@@ -69,7 +69,9 @@ class _ScanQrCodeState extends State<ScanQrCode> {
                         await launchUrl(qrLink);
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Could not open link")),
+                          SnackBar(
+                            content: Center(child: Text("Could not open link")),
+                          ),
                         );
                       }
                     },
@@ -79,18 +81,20 @@ class _ScanQrCodeState extends State<ScanQrCode> {
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                       style: TextStyle(
-                      fontSize: 15,
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
+                        fontSize: 15,
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
                       ),
                     ),
-                    ),
+                  ),
                   IconButton(
                     icon: const Icon(Icons.copy, color: Colors.grey),
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: qrCode));
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Copied to clipboard")),
+                        const SnackBar(
+                          content: Center(child: Text("Copied to clipboard")),
+                        ),
                       );
                     },
                   ),
@@ -139,8 +143,10 @@ class _ScanQrCodeState extends State<ScanQrCode> {
           Expanded(
             flex: 1,
             child: Center(
-              child:
-                  Text('Scan a QR code', style: Theme.of(context).textTheme.headlineMedium),
+              child: Text(
+                'Scan a QR code',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
             ),
           ),
         ],

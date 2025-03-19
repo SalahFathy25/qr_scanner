@@ -22,10 +22,7 @@ Widget noQr() {
           Text(
             'Tap the plus button to add a QR code.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
           ),
         ],
       ),

@@ -29,11 +29,6 @@ Widget customHomeButton(
   );
 }
 
-
 void navigateTo(BuildContext context, Widget screen) {
-  Navigator.push(
-    context,
-    CupertinoPageRoute(builder: (context) => screen),
-  );
+  Navigator.push(context, CupertinoPageRoute(builder: (context) => screen));
 }
-

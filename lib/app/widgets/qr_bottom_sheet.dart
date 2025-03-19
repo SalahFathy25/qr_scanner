@@ -41,10 +41,7 @@ void qrBottomSheet({
               children: [
                 Text(
                   isEditing ? "Edit QR Code" : "Add QR Code",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -83,30 +80,30 @@ void qrBottomSheet({
             SizedBox(height: 5),
             iswhatsapp
                 ? IntlPhoneField(
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      labelText: 'WhatsApp Number',
-                      hintText: 'Enter your WhatsApp Number',
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                    initialCountryCode: 'EG',
-                    initialValue: isEditing ? existingData : null,
-                    onChanged: (phone) {
-                      dataController.text = phone.completeNumber;
-                    },
-                  )
-                : TextFormField(
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      prefixIcon: Icon(Icons.qr_code),
-                      hintText: 'Enter Data',
-                      labelText: 'Data',
-                    ),
-                    controller: dataController,
+                    labelText: 'WhatsApp Number',
+                    hintText: 'Enter your WhatsApp Number',
                   ),
+                  initialCountryCode: 'EG',
+                  initialValue: isEditing ? existingData : null,
+                  onChanged: (phone) {
+                    dataController.text = phone.completeNumber;
+                  },
+                )
+                : TextFormField(
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    prefixIcon: Icon(Icons.qr_code),
+                    hintText: 'Enter Data',
+                    labelText: 'Data',
+                  ),
+                  controller: dataController,
+                ),
             SizedBox(height: 15),
           ],
         ),

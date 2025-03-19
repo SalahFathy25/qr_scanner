@@ -62,60 +62,48 @@ class Home extends StatelessWidget {
             customHomeButton(
               context,
               image: 'assets/logos/facebook_logo.png',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  CupertinoPageRoute(
-                    builder:
-                        (context) => BlocProvider(
-                          create: (context) => FacebookQrCubit(),
-                          child: FacebookScreen(
-                            appbarTitle: 'Facebook Generate QR Code',
-                          ),
-                        ),
+              onPressed:
+                  () => navigateTo(
+                    context,
+                    BlocProvider(
+                      create: (context) => FacebookQrCubit(),
+                      child: FacebookScreen(
+                        appbarTitle: 'Facebook Generate QR Code',
+                      ),
+                    ),
                   ),
-                );
-              },
               title: 'Facebook Generate QR Code',
             ),
 
             customHomeButton(
               context,
               image: 'assets/logos/instagram_logo.png',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  CupertinoPageRoute(
-                    builder:
-                        (context) => BlocProvider(
-                          create: (context) => InstagramQrCubit(),
-                          child: InstagramScreen(
-                            appbarTitle: 'Instagram Generate QR Code',
-                          ),
-                        ),
+              onPressed:
+                  () => navigateTo(
+                    context,
+                    BlocProvider(
+                      create: (context) => InstagramQrCubit(),
+                      child: InstagramScreen(
+                        appbarTitle: 'Instagram Generate QR Code',
+                      ),
+                    ),
                   ),
-                );
-              },
               title: 'Instagram Generate QR Code',
             ),
 
             customHomeButton(
               context,
               image: 'assets/logos/linkedin_logo.png',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  CupertinoPageRoute(
-                    builder:
-                        (context) => BlocProvider(
-                          create: (context) => LinkedinQrCubit(),
-                          child: LinkedinScreen(
-                            appbarTitle: 'LinkedIn Generate QR Code',
-                          ),
-                        ),
+              onPressed:
+                  () => navigateTo(
+                    context,
+                    BlocProvider(
+                      create: (context) => LinkedinQrCubit(),
+                      child: LinkedinScreen(
+                        appbarTitle: 'LinkedIn Generate QR Code',
+                      ),
+                    ),
                   ),
-                );
-              },
               title: 'LinkedIn Generate QR Code',
             ),
 

@@ -19,9 +19,9 @@ Widget qrCard<T extends Cubit>({
     key: UniqueKey(),
     onDismissed: (_) {
       onDismissed();
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('QR code deleted')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Center(child: Text('QR code deleted'))),
+      );
     },
     background: Container(
       color: Colors.red,

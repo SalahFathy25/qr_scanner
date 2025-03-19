@@ -42,6 +42,4 @@ class Apptheme {
     outlinedButtonTheme: CustomOutlinedButtonTheme.darkOutlinedButtonTheme,
     inputDecorationTheme: CustomTextFieldTheme.darkInputDecorationTheme,
   );
-
-  static bool isDark = false;
 }
