@@ -5,7 +5,7 @@ import 'package:qr_code/app/screens/home.dart';
 import 'package:qr_code/core/utils/theme/theme.dart';
 
 void main() {
-  runApp(BlocProvider(create: (context) => WhatsappQrCubit(), child: const MyApp()));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
