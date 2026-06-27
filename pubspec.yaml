@@ -27,6 +27,7 @@ dependencies:
   file_picker: ^8.1.7
   image: ^4.5.3
   zxing2: ^0.2.4
+  package_info_plus: ^9.0.1
 
 dev_dependencies:
   flutter_test:

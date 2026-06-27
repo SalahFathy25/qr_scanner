@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qr_code/app/data/custom_category_cubit.dart';
-import 'package:qr_code/app/data/export_import_cubit.dart';
 import 'package:qr_code/app/data/qr_cubit.dart';
-import 'package:qr_code/app/data/qr_state.dart';
+import 'package:qr_code/app/data/scan_history_cubit.dart';
 import 'package:qr_code/app/models/category_model.dart';
 import 'package:qr_code/app/models/qr_code_model.dart';
 import 'package:qr_code/app/screens/all_qr_screen.dart';
 import 'package:qr_code/app/screens/batch_generate_screen.dart';
 import 'package:qr_code/app/screens/category_screen.dart';
 import 'package:qr_code/app/screens/scan_qr_code.dart';
+import 'package:qr_code/app/screens/settings_screen.dart';
 import 'package:qr_code/core/constants/app_constants.dart';
 
 class Home extends StatelessWidget {
@@ -44,78 +44,45 @@ class _HomeBody extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.batch_prediction_rounded, size: 24),
                   tooltip: 'Batch Generate',
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BatchGenerateScreen(
-                    onGenerate: (title, data, category) {
-                      context.read<QrCubit>().addQrCode(title: title, data: data, category: category);
-                    },
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BlocProvider.value(
+                    value: context.read<QrCubit>(),
+                    child: BatchGenerateScreen(
+                      onGenerate: (title, data, category) {
+                        context.read<QrCubit>().addQrCode(title: title, data: data, category: category);
+                      },
+                    ),
                   ))),
                 ),
                 IconButton(
                   icon: const Icon(Icons.qr_code_scanner_rounded, size: 26),
                   tooltip: 'Scan QR',
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ScanQrCode())),
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BlocProvider.value(
+                    value: context.read<ScanHistoryCubit>(),
+                    child: const ScanQrCode(),
+                  ))),
                 ),
                 IconButton(
                   icon: const Icon(Icons.search_rounded, size: 26),
                   tooltip: 'Search',
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AllQrScreen())),
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BlocProvider.value(
+                    value: context.read<QrCubit>(),
+                    child: const AllQrScreen(),
+                  ))),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.settings_rounded, size: 24),
+                  tooltip: 'Settings',
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
                 ),
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.more_vert_rounded),
                   tooltip: 'More',
-                  onSelected: (v) async {
-                    if (v == 'export') {
-                      final cubit = context.read<QrCubit>();
-                      final state = cubit.state;
-                      if (state is QrSuccess) {
-                        final ec = ExportImportCubit();
-                        ec.exportQrCodes(state.qrCodes);
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Center(child: Text('Exporting...'))));
-                      }
-                    } else if (v == 'import') {
-                      final ec = ExportImportCubit();
-                      final path = await ec.pickJsonFile();
-                      if (path != null) {
-                        final codes = await ec.importFromFile(path);
-                        if (codes != null && codes.isNotEmpty && context.mounted) {
-                          final add = await showDialog<bool>(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                              title: const Text('Import QR Codes'),
-                              content: Text('Imported ${codes.length} QR codes.\nAdd them to your collection?'),
-                              actions: [
-                                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                                FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Add All')),
-                              ],
-                            ),
-                          );
-                          if (add == true && context.mounted) {
-                            final qrCubit = context.read<QrCubit>();
-                            for (final code in codes) {
-                              qrCubit.addQrCode(
-                                title: code.title,
-                                data: code.data,
-                                category: code.category,
-                                colorValue: code.colorValue,
-                                gradientStart: code.gradientStart,
-                                gradientEnd: code.gradientEnd,
-                                hasLogo: code.hasLogo,
-                              );
-                            }
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Center(child: Text('Added ${codes.length} QR codes'))),
-                              );
-                            }
-                          }
-                        }
-                      }
+                  onSelected: (v) {
+                    if (v == 'custom_cats') {
+                      // Trigger custom category management
                     }
                   },
                   itemBuilder: (_) => [
-                    const PopupMenuItem(value: 'export', child: ListTile(leading: Icon(Icons.file_upload_outlined), title: Text('Export All'), dense: true)),
-                    const PopupMenuItem(value: 'import', child: ListTile(leading: Icon(Icons.file_download_outlined), title: Text('Import'), dense: true)),
                     const PopupMenuItem(value: 'custom_cats', child: ListTile(leading: Icon(Icons.category_outlined), title: Text('Manage Categories'), dense: true)),
                   ],
                 ),
@@ -235,7 +202,13 @@ class _HomeBody extends StatelessWidget {
 
   void _openCategory(BuildContext context, CategoryModel category) {
     Navigator.push(context, MaterialPageRoute(
-      builder: (_) => CategoryScreen(category: category),
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: context.read<QrCubit>()),
+          BlocProvider.value(value: context.read<CustomCategoryCubit>()),
+        ],
+        child: CategoryScreen(category: category),
+      ),
     ));
   }
 

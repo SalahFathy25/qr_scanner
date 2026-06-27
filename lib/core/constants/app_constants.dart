@@ -8,6 +8,11 @@ class AppConstants {
   static const String scanHistoryKey = 'scan_history';
   static const String customCategoriesKey = 'custom_categories';
   static const String onboardingDoneKey = 'onboarding_done';
+  static const String themeModeKey = 'theme_mode';
+  static const String defaultColorKey = 'default_color';
+  static const String defaultGradientKey = 'default_gradient';
+  static const String autoLaunchScannerKey = 'auto_launch_scanner';
+  static const String vibrateOnScanKey = 'vibrate_on_scan';
   static const String appName = 'QR Studio';
 
   static const List<CategoryModel> builtInCategories = [
