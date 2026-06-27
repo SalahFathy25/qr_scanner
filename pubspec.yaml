@@ -24,6 +24,9 @@ dependencies:
   image_picker: ^1.1.2
   google_fonts: ^6.2.1
   flutter_native_splash: ^2.4.4
+  file_picker: ^8.1.7
+  image: ^4.5.3
+  zxing2: ^0.2.4
 
 dev_dependencies:
   flutter_test:
@@ -41,7 +44,7 @@ flutter:
 
 flutter_launcher_icons:
   android: true
-  ios: true
+  ios: false
   image_path: "assets/icons/app_icon.png"
   adaptive_icon_background: "#6C63FF"
   adaptive_icon_foreground: "assets/icons/app_icon_foreground.png"
@@ -51,7 +54,7 @@ flutter_native_splash:
   color_dark: "#0F0F1A"
   image: "assets/icons/splash_icon.png"
   android: true
-  ios: true
+  ios: false
   android_gravity: center
   ios_content_mode: center
   fullscreen: true

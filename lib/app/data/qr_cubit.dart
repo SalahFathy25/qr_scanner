@@ -38,6 +38,9 @@ class QrCubit extends Cubit<QrState> {
     required String data,
     required String category,
     int colorValue = 0xFF000000,
+    int? gradientStart,
+    int? gradientEnd,
+    bool hasLogo = false,
   }) async {
     try {
       final currentState = state;
@@ -50,6 +53,9 @@ class QrCubit extends Cubit<QrState> {
         data: data,
         category: category,
         colorValue: colorValue,
+        gradientStart: gradientStart,
+        gradientEnd: gradientEnd,
+        hasLogo: hasLogo,
       );
 
       final updated = List<QrCodeModel>.from(currentCodes)..add(newQr);

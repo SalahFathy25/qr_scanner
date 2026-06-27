@@ -75,10 +75,50 @@ class _HomeBody extends StatelessWidget {
                         ec.exportQrCodes(state.qrCodes);
                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Center(child: Text('Exporting...'))));
                       }
+                    } else if (v == 'import') {
+                      final ec = ExportImportCubit();
+                      final path = await ec.pickJsonFile();
+                      if (path != null) {
+                        final codes = await ec.importFromFile(path);
+                        if (codes != null && codes.isNotEmpty && context.mounted) {
+                          final add = await showDialog<bool>(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                              title: const Text('Import QR Codes'),
+                              content: Text('Imported ${codes.length} QR codes.\nAdd them to your collection?'),
+                              actions: [
+                                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                                FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Add All')),
+                              ],
+                            ),
+                          );
+                          if (add == true && context.mounted) {
+                            final qrCubit = context.read<QrCubit>();
+                            for (final code in codes) {
+                              qrCubit.addQrCode(
+                                title: code.title,
+                                data: code.data,
+                                category: code.category,
+                                colorValue: code.colorValue,
+                                gradientStart: code.gradientStart,
+                                gradientEnd: code.gradientEnd,
+                                hasLogo: code.hasLogo,
+                              );
+                            }
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Center(child: Text('Added ${codes.length} QR codes'))),
+                              );
+                            }
+                          }
+                        }
+                      }
                     }
                   },
                   itemBuilder: (_) => [
                     const PopupMenuItem(value: 'export', child: ListTile(leading: Icon(Icons.file_upload_outlined), title: Text('Export All'), dense: true)),
+                    const PopupMenuItem(value: 'import', child: ListTile(leading: Icon(Icons.file_download_outlined), title: Text('Import'), dense: true)),
                     const PopupMenuItem(value: 'custom_cats', child: ListTile(leading: Icon(Icons.category_outlined), title: Text('Manage Categories'), dense: true)),
                   ],
                 ),

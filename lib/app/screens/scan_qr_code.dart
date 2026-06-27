@@ -1,13 +1,16 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:qr_code/app/data/scan_history_cubit.dart';
 import 'package:qr_code/app/models/qr_code_model.dart';
 import 'package:qr_code/app/widgets/qr_view.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:zxing2/qrcode.dart';
 import 'package:qr_code/core/utils/permission_handler.dart';
 
 class ScanQrCode extends StatefulWidget {
@@ -56,20 +59,48 @@ class _ScanQrCodeState extends State<ScanQrCode> {
     final xFile = await _picker.pickImage(source: ImageSource.gallery);
     if (xFile == null) return;
 
-    // For gallery images, we read the file bytes and try to decode
-    // using qr_code_scanner_plus or a fallback
     try {
-      // Use the camera controller to process the image if possible,
-      // otherwise show user a message about manual entry
+      final bytes = await xFile.readAsBytes();
+      final decodedImage = img.decodeImage(bytes);
+      if (decodedImage == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Center(child: Text('Could not decode image'))),
+          );
+        }
+        return;
+      }
+
+      // Convert RGBA bytes to ARGB ints for zxing2
+      final rgba = decodedImage.getBytes();
+      final w = decodedImage.width;
+      final h = decodedImage.height;
+      final pixels = Int32List(w * h);
+      for (int i = 0; i < w * h; i++) {
+        final offset = i * 4;
+        pixels[i] = (rgba[offset + 3] << 24) | // A
+            (rgba[offset] << 16) |              // R
+            (rgba[offset + 1] << 8) |           // G
+            rgba[offset + 2];                    // B
+      }
+
+      final source = RGBLuminanceSource(w, h, pixels);
+      final bitmap = BinaryBitmap(HybridBinarizer(source));
+      final reader = QRCodeReader();
+      final result = reader.decode(bitmap);
+
+      final String qrCode = result.text;
+      final scanModel = QrCodeModel(
+        id: 'gallery_${DateTime.now().millisecondsSinceEpoch}',
+        title: 'From Gallery',
+        data: qrCode,
+        category: _detectCategory(qrCode),
+        colorValue: 0xFF6C63FF,
+      );
+
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Center(child: Text('Image selected. You can enter the data manually.')),
-            action: SnackBarAction(label: 'Enter', onPressed: () {
-              // Navigate back - user will enter data manually
-            }),
-          ),
-        );
+        context.read<ScanHistoryCubit>().addScan(scanModel);
+        _showQRDialog(qrCode);
       }
     } catch (e) {
       if (mounted) {
