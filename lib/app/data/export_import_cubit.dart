@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:bloc/bloc.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_code/app/models/qr_code_model.dart';
 import 'package:share_plus/share_plus.dart';
@@ -53,13 +54,13 @@ class ExportImportCubit extends Cubit<ExportImportState> {
     }
   }
 
-  Future<void> importFromFile(String filePath) async {
+  Future<List<QrCodeModel>?> importFromFile(String filePath) async {
     emit(ExportImportLoading());
     try {
       final file = File(filePath);
       if (!await file.exists()) {
         emit(ExportImportError(message: 'File not found'));
-        return;
+        return null;
       }
 
       final content = await file.readAsString();
@@ -67,7 +68,7 @@ class ExportImportCubit extends Cubit<ExportImportState> {
 
       if (data['app'] != 'QR Studio') {
         emit(ExportImportError(message: 'Invalid backup file'));
-        return;
+        return null;
       }
 
       final codesJson = data['qrCodes'] as List<dynamic>;
@@ -79,15 +80,18 @@ class ExportImportCubit extends Cubit<ExportImportState> {
         message: 'Imported ${codes.length} QR codes',
         importedCodes: codes,
       ));
+      return codes;
     } catch (e) {
       emit(ExportImportError(message: 'Import failed: $e'));
+      return null;
     }
   }
 
   Future<String?> pickJsonFile() async {
-    // For simplicity, uses a file picker. On mobile, this requires
-    // file_picker package. Here we use a simple path approach.
-    // In production, use file_picker package.
-    return null;
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+    );
+    return result?.files.single.path;
   }
 }
