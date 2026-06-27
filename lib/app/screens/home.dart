@@ -44,13 +44,10 @@ class _HomeBody extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.batch_prediction_rounded, size: 24),
                   tooltip: 'Batch Generate',
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BlocProvider.value(
-                    value: context.read<QrCubit>(),
-                    child: BatchGenerateScreen(
-                      onGenerate: (title, data, category) {
-                        context.read<QrCubit>().addQrCode(title: title, data: data, category: category);
-                      },
-                    ),
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BatchGenerateScreen(
+                    onGenerate: (title, data, category) {
+                      context.read<QrCubit>().addQrCode(title: title, data: data, category: category);
+                    },
                   ))),
                 ),
                 IconButton(
@@ -238,7 +235,7 @@ class _HomeBody extends StatelessWidget {
 
   void _openCategory(BuildContext context, CategoryModel category) {
     Navigator.push(context, MaterialPageRoute(
-      builder: (_) => BlocProvider.value(value: context.read<QrCubit>(), child: CategoryScreen(category: category)),
+      builder: (_) => CategoryScreen(category: category),
     ));
   }
 

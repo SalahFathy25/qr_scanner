@@ -10,13 +10,26 @@ import 'package:qr_code/app/screens/onboarding_screen.dart';
 import 'package:qr_code/core/constants/app_constants.dart';
 import 'package:qr_code/core/utils/theme/theme.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  final prefs = await SharedPreferences.getInstance();
+  final onboardingDone = prefs.getBool(AppConstants.onboardingDoneKey) ?? false;
+  
+  runApp(
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => QrCubit()),
+        BlocProvider(create: (_) => ScanHistoryCubit()),
+        BlocProvider(create: (_) => CustomCategoryCubit()),
+      ],
+      child: MyApp(onboardingDone: onboardingDone),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool onboardingDone;
+  const MyApp({super.key, required this.onboardingDone});
 
   @override
   Widget build(BuildContext context) {
@@ -32,56 +45,15 @@ class MyApp extends StatelessWidget {
         ThemeData.dark().textTheme,
       )),
       themeMode: ThemeMode.system,
-      home: const AppEntry(),
-    );
-  }
-}
-
-class AppEntry extends StatelessWidget {
-  const AppEntry({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: _checkOnboarding(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Scaffold(body: Center(child: CircularProgressIndicator()));
-
-        if (snapshot.data == true) {
-          return const MainApp();
+      home: onboardingDone ? const Home() : OnboardingScreen(onDone: () async {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool(AppConstants.onboardingDoneKey, true);
+        if (context.mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const Home()),
+          );
         }
-
-        return OnboardingScreen(onDone: () async {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setBool(AppConstants.onboardingDoneKey, true);
-          if (context.mounted) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => const MainApp()),
-            );
-          }
-        });
-      },
-    );
-  }
-
-  Future<bool> _checkOnboarding() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(AppConstants.onboardingDoneKey) ?? false;
-  }
-}
-
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (_) => QrCubit()),
-        BlocProvider(create: (_) => ScanHistoryCubit()),
-        BlocProvider(create: (_) => CustomCategoryCubit()),
-      ],
-      child: const Home(),
+      }),
     );
   }
 }
