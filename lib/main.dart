@@ -3,6 +3,7 @@ import 'package:qr_code/app/screens/home.dart';
 import 'package:qr_code/core/utils/theme/theme.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -11,14 +12,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: Apptheme.lightTheme,
-        darkTheme: Apptheme.darkTheme,
-        themeMode: ThemeMode.system,
-        home: const Home(),
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'QR Generator',
+      theme: Apptheme.lightTheme,
+      darkTheme: Apptheme.darkTheme,
+      themeMode: ThemeMode.system,
+      home: const Home(),
     );
   }
 }
