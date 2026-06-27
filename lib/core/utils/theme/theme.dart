@@ -12,12 +12,25 @@ import 'custom_themes/custom_text_theme.dart';
 class Apptheme {
   Apptheme._();
 
+  static const Color primary = Color(0xFF6C63FF);
+  static const Color secondary = Color(0xFF00BFA6);
+  static const Color surface = Color(0xFFF8F9FE);
+  static const Color onSurface = Color(0xFF1A1A2E);
+  static const Color darkSurface = Color(0xFF0F0F1A);
+  static const Color darkOnSurface = Color(0xFFE8E8F0);
+
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     fontFamily: 'Poppins',
     brightness: Brightness.light,
-    primaryColor: Colors.blue,
-    scaffoldBackgroundColor: Colors.white,
+    primaryColor: primary,
+    scaffoldBackgroundColor: surface,
+    colorScheme: const ColorScheme.light(
+      primary: primary,
+      secondary: secondary,
+      surface: surface,
+      onSurface: onSurface,
+    ),
     textTheme: CustomTextTheme.lightTextTheme,
     chipTheme: CustomChipTheme.lightChipTheme,
     appBarTheme: CustomAppbarTheme.lightAppBarTheme,
@@ -27,12 +40,19 @@ class Apptheme {
     outlinedButtonTheme: CustomOutlinedButtonTheme.lightOutlinedButtonTheme,
     inputDecorationTheme: CustomTextFieldTheme.lightInputDecorationTheme,
   );
+
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     fontFamily: 'Poppins',
     brightness: Brightness.dark,
-    primaryColor: Colors.blue,
-    scaffoldBackgroundColor: Colors.black,
+    primaryColor: primary,
+    scaffoldBackgroundColor: darkSurface,
+    colorScheme: const ColorScheme.dark(
+      primary: primary,
+      secondary: secondary,
+      surface: darkSurface,
+      onSurface: darkOnSurface,
+    ),
     textTheme: CustomTextTheme.darkTextTheme,
     chipTheme: CustomChipTheme.darkChipTheme,
     appBarTheme: CustomAppbarTheme.darkAppBarTheme,
