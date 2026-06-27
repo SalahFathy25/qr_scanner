@@ -130,7 +130,7 @@ class CategoryScreen extends StatelessWidget {
                   onPressed: () => showQrBottomSheet(
                     context: context,
                     category: category,
-                    onSave: ({required title, required data, required color}) {
+                    onSave: ({required title, required data, required color, int? gradientStart, int? gradientEnd, bool hasLogo = false}) {
                       context.read<QrCubit>().addQrCode(
                         title: title,
                         data: data,
