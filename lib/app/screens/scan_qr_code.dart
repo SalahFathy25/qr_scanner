@@ -1,8 +1,12 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:qr_code/app/data/scan_history_cubit.dart';
+import 'package:qr_code/app/models/qr_code_model.dart';
+import 'package:qr_code/app/widgets/qr_view.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ScanQrCode extends StatefulWidget {
@@ -17,6 +21,7 @@ class _ScanQrCodeState extends State<ScanQrCode> {
   Barcode? result;
   QRViewController? controller;
   bool isDialogOpen = false;
+  bool showHistory = false;
 
   @override
   void reassemble() {
@@ -30,33 +35,53 @@ class _ScanQrCodeState extends State<ScanQrCode> {
     }
   }
 
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
+  }
+
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) async {
       if (!isDialogOpen && (result == null || result!.code != scanData.code)) {
-        setState(() {
-          result = scanData;
-        });
+        setState(() => result = scanData);
 
-        String qrCode = scanData.code!;
-        Uri? qrUri = Uri.tryParse(qrCode);
+        final String qrCode = scanData.code!;
 
-        if (qrUri != null &&
-            (qrUri.scheme == 'http' || qrUri.scheme == 'https')) {
+        final scanModel = QrCodeModel(
+          id: 'scan_${DateTime.now().millisecondsSinceEpoch}',
+          title: 'Scanned QR',
+          data: qrCode,
+          category: _detectCategory(qrCode),
+          colorValue: 0xFF6C63FF,
+        );
+        context.read<ScanHistoryCubit>().addScan(scanModel);
+
+        final Uri? qrUri = Uri.tryParse(qrCode);
+        if (qrUri != null && (qrUri.scheme == 'http' || qrUri.scheme == 'https')) {
           if (await canLaunchUrl(qrUri)) {
             await launchUrl(qrUri);
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Center(child: Text("Could not open link")),
-              ),
-            );
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Center(child: Text("Could not open link"))),
+              );
+            }
           }
         } else {
           _showQRDialog(qrCode);
         }
       }
     });
+  }
+
+  String _detectCategory(String data) {
+    if (data.startsWith('WIFI:')) return 'wifi';
+    if (data.startsWith('BEGIN:VCARD') || data.startsWith('BEGIN:vCard')) return 'vcard';
+    if (data.startsWith('mailto:')) return 'email';
+    if (data.startsWith('http')) return 'url';
+    return 'text';
   }
 
   Future<void> _showQRDialog(String qrCode) async {
@@ -67,47 +92,45 @@ class _ScanQrCodeState extends State<ScanQrCode> {
       barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          title: const Text("QR Code Scanned", textAlign: TextAlign.center),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: const Text("Scanned QR", textAlign: TextAlign.center),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Text(
-                      qrCode,
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 2,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        qrCode,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.blue.shade600,
+                        ),
                       ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.copy, color: Colors.grey),
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: qrCode));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Center(child: Text("Copied to clipboard")),
-                        ),
-                      );
-                    },
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.copy_rounded, color: Colors.grey),
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: qrCode));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Center(child: Text("Copied"))),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 10),
-              QrImageView(
-                foregroundColor: Colors.black,
-                eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.circle),
-                data: qrCode,
-                version: QrVersions.auto,
-                size: 200,
-              ),
+              const SizedBox(height: 16),
+              _buildScannedCategory("Text"),
             ],
           ),
           actions: [
@@ -125,27 +148,187 @@ class _ScanQrCodeState extends State<ScanQrCode> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Scan QR Code'), centerTitle: true),
-      body: Column(
-        children: [
-          Expanded(
-            flex: 5,
-            child: QRView(key: qrKey, onQRViewCreated: _onQRViewCreated),
-          ),
-          Expanded(
-            flex: 1,
-            child: Center(
-              child: Text(
-                'Scan a QR code',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-            ),
-          ),
-        ],
+  Widget _buildScannedCategory(String type) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFF6C63FF).withAlpha(20),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        type,
+        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF6C63FF)),
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      body: SafeArea(
+        child: showHistory
+            ? _buildHistoryView()
+            : Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        const Spacer(),
+                        Text(
+                          'Scan QR',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          icon: const Icon(Icons.history_rounded, size: 26),
+                          onPressed: () => setState(() => showHistory = true),
+                          tooltip: 'Scan History',
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    flex: 5,
+                    child: Container(
+                      margin: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: const Color(0xFF6C63FF).withAlpha(40), width: 2),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(22),
+                        child: QRView(key: qrKey, onQRViewCreated: _onQRViewCreated),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Icon(Icons.qr_code_scanner_rounded, size: 32, color: Colors.grey.shade400),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Point camera at a QR code',
+                            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildHistoryView() {
+    return BlocBuilder<ScanHistoryCubit, ScanHistoryState>(
+      builder: (context, state) {
+        final scans = state is ScanHistoryLoaded ? state.scans : <QrCodeModel>[];
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const Spacer(),
+                  const Text(
+                    'Scan History',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.qr_code_scanner_rounded, size: 26),
+                    onPressed: () => setState(() => showHistory = false),
+                    tooltip: 'Scan',
+                  ),
+                ],
+              ),
+            ),
+            if (scans.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    const Spacer(),
+                    TextButton.icon(
+                      icon: const Icon(Icons.delete_sweep_rounded, size: 18),
+                      label: const Text('Clear History'),
+                      onPressed: () => context.read<ScanHistoryCubit>().clearHistory(),
+                    ),
+                  ],
+                ),
+              ),
+            Expanded(
+              child: scans.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.history_rounded, size: 64, color: Colors.grey.shade400),
+                          const SizedBox(height: 16),
+                          Text('No scan history', style: TextStyle(color: Colors.grey.shade600)),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: scans.length,
+                      itemBuilder: (context, index) {
+                        final scan = scans[index];
+                        return ListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF6C63FF).withAlpha(20),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                              Icons.qr_code_scanner_rounded,
+                              color: Color(0xFF6C63FF),
+                            ),
+                          ),
+                          title: Text(
+                            scan.data,
+                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text(
+                            _formatDate(scan.createdAt),
+                            style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                          ),
+                          onTap: () => qrView(context, scan),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _formatDate(DateTime dt) {
+    final now = DateTime.now();
+    final diff = now.difference(dt);
+    if (diff.inMinutes < 1) return 'Just now';
+    if (diff.inHours < 1) return '${diff.inMinutes}m ago';
+    if (diff.inDays < 1) return '${diff.inHours}h ago';
+    return '${dt.day}/${dt.month}/${dt.year}';
   }
 }

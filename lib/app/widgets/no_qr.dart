@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
-Widget noQr() {
+Widget noQr({String message = 'No QR codes found'}) {
   return Center(
     child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 40),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Lottie.asset('assets/lottie/qr_scanner.json', height: 220),
-          const SizedBox(height: 20),
+          Lottie.asset('assets/lottie/qr_scanner.json', height: 200),
+          const SizedBox(height: 24),
           Text(
-            'No QR codes found',
-            style: TextStyle(
+            message,
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
+              color: Colors.grey,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
-            'Tap the plus button to add a QR code.',
+            'Tap + to create a new QR code',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
           ),
         ],
       ),
