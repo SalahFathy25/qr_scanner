@@ -1,34 +1,39 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:io';
-
 import 'package:bloc/bloc.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:qr_code/app/models/qr_code_model.dart';
+import 'package:qr_studio/app/models/qr_code_model.dart';
 import 'package:share_plus/share_plus.dart';
 
-sealed class ExportImportState {}
+sealed class ExportImportState {
+  const ExportImportState();
+}
 
-final class ExportImportInitial extends ExportImportState {}
+final class ExportImportInitial extends ExportImportState {
+  const ExportImportInitial();
+}
 
-final class ExportImportLoading extends ExportImportState {}
+final class ExportImportLoading extends ExportImportState {
+  const ExportImportLoading();
+}
 
 final class ExportImportSuccess extends ExportImportState {
   final String message;
   final List<QrCodeModel>? importedCodes;
-  ExportImportSuccess({required this.message, this.importedCodes});
+  const ExportImportSuccess({required this.message, this.importedCodes});
 }
 
 final class ExportImportError extends ExportImportState {
   final String message;
-  ExportImportError({required this.message});
+  const ExportImportError({required this.message});
 }
 
 class ExportImportCubit extends Cubit<ExportImportState> {
-  ExportImportCubit() : super(ExportImportInitial());
+  ExportImportCubit() : super(const ExportImportInitial());
 
   Future<void> exportQrCodes(List<QrCodeModel> codes) async {
-    emit(ExportImportLoading());
+    emit(const ExportImportLoading());
     try {
       final exportData = {
         'app': 'QR Studio',
@@ -55,11 +60,11 @@ class ExportImportCubit extends Cubit<ExportImportState> {
   }
 
   Future<List<QrCodeModel>?> importFromFile(String filePath) async {
-    emit(ExportImportLoading());
+    emit(const ExportImportLoading());
     try {
       final file = File(filePath);
       if (!await file.exists()) {
-        emit(ExportImportError(message: 'File not found'));
+        emit(const ExportImportError(message: 'File not found'));
         return null;
       }
 
@@ -67,7 +72,7 @@ class ExportImportCubit extends Cubit<ExportImportState> {
       final data = jsonDecode(content) as Map<String, dynamic>;
 
       if (data['app'] != 'QR Studio') {
-        emit(ExportImportError(message: 'Invalid backup file'));
+        emit(const ExportImportError(message: 'Invalid backup file'));
         return null;
       }
 

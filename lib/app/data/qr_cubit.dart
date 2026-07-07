@@ -1,27 +1,22 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:math';
-
 import 'package:bloc/bloc.dart';
-import 'package:qr_code/app/models/qr_code_model.dart';
-import 'package:qr_code/core/constants/app_constants.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:qr_studio/app/models/qr_code_model.dart';
+import 'package:qr_studio/core/services/storage_service.dart';
 import 'qr_state.dart';
 
 class QrCubit extends Cubit<QrState> {
-  QrCubit() : super(QrInitial()) {
+  QrCubit(this._storage) : super(QrInitial()) {
     _loadQrCodes();
   }
+
+  final StorageService _storage;
 
   Future<void> _loadQrCodes() async {
     emit(QrLoading());
     try {
       await _migrateOldData();
-      final prefs = await SharedPreferences.getInstance();
-      final qrCodesJson = prefs.getStringList(AppConstants.storageKey) ?? [];
-      final qrCodes = qrCodesJson
-          .map((json) => QrCodeModel.fromJson(jsonDecode(json)))
-          .toList();
+      final qrCodes = await _storage.loadQrCodes();
       emit(QrSuccess(qrCodes: qrCodes));
     } catch (e) {
       emit(QrError(message: 'Failed to load QR codes: $e'));
@@ -38,14 +33,12 @@ class QrCubit extends Cubit<QrState> {
     required String data,
     required String category,
     int colorValue = 0xFF000000,
-    int? gradientStart,
-    int? gradientEnd,
-    bool hasLogo = false,
   }) async {
     try {
-      final currentState = state;
-      final currentCodes =
-          currentState is QrSuccess ? currentState.qrCodes : <QrCodeModel>[];
+      final currentCodes = switch (state) {
+        QrSuccess(:final qrCodes) => qrCodes,
+        _ => <QrCodeModel>[],
+      };
 
       final newQr = QrCodeModel(
         id: _generateId(),
@@ -53,13 +46,10 @@ class QrCubit extends Cubit<QrState> {
         data: data,
         category: category,
         colorValue: colorValue,
-        gradientStart: gradientStart,
-        gradientEnd: gradientEnd,
-        hasLogo: hasLogo,
       );
 
-      final updated = List<QrCodeModel>.from(currentCodes)..add(newQr);
-      await _saveQrCodes(updated);
+      final updated = [newQr, ...currentCodes];
+      await _storage.saveQrCodes(updated);
       emit(QrSuccess(qrCodes: updated));
     } catch (e) {
       emit(QrError(message: 'Failed to add QR code: $e'));
@@ -75,23 +65,21 @@ class QrCubit extends Cubit<QrState> {
     int? colorValue,
   }) async {
     try {
-      if (state is! QrSuccess) return;
-      final currentCodes = List<QrCodeModel>.from(
-        (state as QrSuccess).qrCodes,
-      );
-      final index = currentCodes.indexWhere((q) => q.id == id);
-      if (index == -1) return;
+      if (state case QrSuccess(:final qrCodes)) {
+        final currentCodes = List<QrCodeModel>.from(qrCodes);
+        final index = currentCodes.indexWhere((q) => q.id == id);
+        if (index == -1) return;
 
-      final updated = currentCodes[index].copyWith(
-        title: title,
-        data: data,
-        category: category,
-        isFavorite: isFavorite,
-        colorValue: colorValue,
-      );
-      currentCodes[index] = updated;
-      await _saveQrCodes(currentCodes);
-      emit(QrSuccess(qrCodes: currentCodes));
+        currentCodes[index] = currentCodes[index].copyWith(
+          title: title,
+          data: data,
+          category: category,
+          isFavorite: isFavorite,
+          colorValue: colorValue,
+        );
+        await _storage.saveQrCodes(currentCodes);
+        emit(QrSuccess(qrCodes: currentCodes));
+      }
     } catch (e) {
       emit(QrError(message: 'Failed to update QR code: $e'));
     }
@@ -99,13 +87,12 @@ class QrCubit extends Cubit<QrState> {
 
   Future<void> deleteQrCode(String id) async {
     try {
-      if (state is! QrSuccess) return;
-      final currentCodes = List<QrCodeModel>.from(
-        (state as QrSuccess).qrCodes,
-      );
-      currentCodes.removeWhere((q) => q.id == id);
-      await _saveQrCodes(currentCodes);
-      emit(QrSuccess(qrCodes: currentCodes));
+      if (state case QrSuccess(:final qrCodes)) {
+        final currentCodes = List<QrCodeModel>.from(qrCodes);
+        currentCodes.removeWhere((q) => q.id == id);
+        await _storage.saveQrCodes(currentCodes);
+        emit(QrSuccess(qrCodes: currentCodes));
+      }
     } catch (e) {
       emit(QrError(message: 'Failed to delete QR code: $e'));
     }
@@ -113,70 +100,61 @@ class QrCubit extends Cubit<QrState> {
 
   Future<void> toggleFavorite(String id) async {
     try {
-      if (state is! QrSuccess) return;
-      final currentCodes = List<QrCodeModel>.from(
-        (state as QrSuccess).qrCodes,
-      );
-      final index = currentCodes.indexWhere((q) => q.id == id);
-      if (index == -1) return;
+      if (state case QrSuccess(:final qrCodes)) {
+        final currentCodes = List<QrCodeModel>.from(qrCodes);
+        final index = currentCodes.indexWhere((q) => q.id == id);
+        if (index == -1) return;
 
-      currentCodes[index] = currentCodes[index].copyWith(
-        isFavorite: !currentCodes[index].isFavorite,
-      );
-      await _saveQrCodes(currentCodes);
-      emit(QrSuccess(qrCodes: currentCodes));
+        currentCodes[index] = currentCodes[index].copyWith(
+          isFavorite: !currentCodes[index].isFavorite,
+        );
+        await _storage.saveQrCodes(currentCodes);
+        emit(QrSuccess(qrCodes: currentCodes));
+      }
     } catch (e) {
       emit(QrError(message: 'Failed to toggle favorite: $e'));
     }
   }
 
   List<QrCodeModel> getQrCodesByCategory(String category) {
-    if (state is! QrSuccess) return [];
-    return (state as QrSuccess)
-        .qrCodes
-        .where((q) => q.category == category)
-        .toList();
+    if (state case QrSuccess(:final qrCodes)) {
+      return qrCodes.where((q) => q.category == category).toList();
+    }
+    return [];
   }
 
   List<QrCodeModel> searchQrCodes(String query) {
-    if (state is! QrSuccess) return [];
-    if (query.isEmpty) return (state as QrSuccess).qrCodes;
-    final lowerQuery = query.toLowerCase();
-    return (state as QrSuccess)
-        .qrCodes
-        .where(
-          (q) =>
-              q.title.toLowerCase().contains(lowerQuery) ||
-              q.data.toLowerCase().contains(lowerQuery),
-        )
-        .toList();
+    if (state case QrSuccess(:final qrCodes)) {
+      if (query.isEmpty) return qrCodes;
+      final lowerQuery = query.toLowerCase();
+      return qrCodes.where(
+        (q) =>
+            q.title.toLowerCase().contains(lowerQuery) ||
+            q.data.toLowerCase().contains(lowerQuery),
+      ).toList();
+    }
+    return [];
   }
 
   List<QrCodeModel> get favoriteQrCodes {
-    if (state is! QrSuccess) return [];
-    return (state as QrSuccess).qrCodes.where((q) => q.isFavorite).toList();
+    if (state case QrSuccess(:final qrCodes)) {
+      return qrCodes.where((q) => q.isFavorite).toList();
+    }
+    return [];
   }
 
   Future<void> clearAllQrCodes() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(AppConstants.storageKey);
+      await _storage.saveQrCodes([]);
       emit(QrSuccess(qrCodes: []));
     } catch (e) {
       emit(QrError(message: 'Failed to clear QR codes: $e'));
     }
   }
 
-  Future<void> _saveQrCodes(List<QrCodeModel> qrCodes) async {
-    final prefs = await SharedPreferences.getInstance();
-    final qrCodesJson = qrCodes.map((qr) => jsonEncode(qr.toJson())).toList();
-    await prefs.setStringList(AppConstants.storageKey, qrCodesJson);
-  }
-
   Future<void> _migrateOldData() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final hasMigrated = prefs.getBool('data_migrated') ?? false;
+      final hasMigrated = _storage.getBool('data_migrated');
       if (hasMigrated) return;
 
       final oldKeys = {
@@ -187,9 +165,8 @@ class QrCubit extends Cubit<QrState> {
       };
 
       final allOldCodes = <QrCodeModel>[];
-
       for (final entry in oldKeys.entries) {
-        final oldJsonList = prefs.getStringList(entry.value) ?? [];
+        final oldJsonList = _storage.getStringList(entry.value) ?? [];
         for (final jsonStr in oldJsonList) {
           try {
             final oldModel = QrCodeModel.fromJson(jsonDecode(jsonStr));
@@ -203,21 +180,16 @@ class QrCubit extends Cubit<QrState> {
             );
           } catch (_) {}
         }
-        prefs.remove(entry.value);
+        await _storage.remove(entry.value);
       }
 
       if (allOldCodes.isNotEmpty) {
-        final existingJson = prefs.getStringList(AppConstants.storageKey) ?? [];
-        final existingCodes = existingJson
-            .map((j) => QrCodeModel.fromJson(jsonDecode(j)))
-            .toList();
+        final existingCodes = await _storage.loadQrCodes();
         final merged = [...existingCodes, ...allOldCodes];
-        final mergedJson =
-            merged.map((qr) => jsonEncode(qr.toJson())).toList();
-        await prefs.setStringList(AppConstants.storageKey, mergedJson);
+        await _storage.saveQrCodes(merged);
       }
 
-      await prefs.setBool('data_migrated', true);
+      await _storage.setBool('data_migrated', true);
     } catch (_) {}
   }
 }

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 class CustomBottomSheetTheme {
   CustomBottomSheetTheme._();
@@ -19,3 +19,4 @@ class CustomBottomSheetTheme {
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
   );
 }
+

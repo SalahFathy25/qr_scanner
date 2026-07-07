@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 class CustomChipTheme {
   CustomChipTheme._();
@@ -19,3 +19,4 @@ class CustomChipTheme {
     checkmarkColor: Colors.white,
   );
 }
+
