@@ -1,20 +1,20 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:qr_code/core/constants/app_constants.dart';
+import 'package:qr_studio/core/constants/app_constants.dart';
+import 'package:qr_studio/core/services/storage_service.dart';
 
 class ThemeCubit extends Cubit<ThemeMode> {
-  final SharedPreferences _prefs;
+  ThemeCubit(this._storage) : super(_loadTheme(_storage));
 
-  ThemeCubit(this._prefs) : super(_loadTheme(_prefs));
+  final StorageService _storage;
 
-  static ThemeMode _loadTheme(SharedPreferences prefs) {
-    final index = prefs.getInt(AppConstants.themeModeKey) ?? 0;
+  static ThemeMode _loadTheme(StorageService storage) {
+    final index = storage.getInt(AppConstants.themeModeKey);
     return ThemeMode.values[index];
   }
 
   void setTheme(ThemeMode mode) {
-    _prefs.setInt(AppConstants.themeModeKey, mode.index);
+    _storage.setInt(AppConstants.themeModeKey, mode.index);
     emit(mode);
   }
 

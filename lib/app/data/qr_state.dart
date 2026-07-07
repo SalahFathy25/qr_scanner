@@ -1,4 +1,4 @@
-import 'package:qr_code/app/models/qr_code_model.dart';
+﻿import 'package:qr_studio/app/models/qr_code_model.dart';
 
 sealed class QrState {}
 
@@ -15,3 +15,4 @@ final class QrError extends QrState {
   final String message;
   QrError({required this.message});
 }
+

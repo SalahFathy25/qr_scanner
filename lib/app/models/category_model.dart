@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 class CategoryModel {
   final String id;
@@ -23,16 +23,12 @@ class CategoryModel {
     return CategoryModel(
       id: json['id'] as String,
       name: json['name'] as String,
-      icon: _iconFromCodePoint(json['iconCodePoint'] as int),
+      // ignore: non_const_argument_for_const_parameter
+      icon: IconData(json['iconCodePoint'] as int),
       colorValue: json['colorValue'] as int,
       isBuiltIn: json['isBuiltIn'] as bool? ?? false,
       imagePath: json['imagePath'] as String?,
     );
-  }
-
-  static IconData _iconFromCodePoint(int codePoint) {
-    // ignore: non_const_argument_for_const_parameter
-    return IconData(codePoint);
   }
 
   Map<String, dynamic> toJson() {
@@ -46,3 +42,4 @@ class CategoryModel {
     };
   }
 }
+

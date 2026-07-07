@@ -1,52 +1,48 @@
-import 'dart:convert';
-import 'package:bloc/bloc.dart';
-import 'package:qr_code/app/models/qr_code_model.dart';
-import 'package:qr_code/core/constants/app_constants.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+﻿import 'package:bloc/bloc.dart';
+import 'package:qr_studio/app/models/qr_code_model.dart';
+import 'package:qr_studio/core/services/storage_service.dart';
 
-sealed class ScanHistoryState {}
+sealed class ScanHistoryState {
+  const ScanHistoryState();
+}
 
 final class ScanHistoryLoaded extends ScanHistoryState {
   final List<QrCodeModel> scans;
-  ScanHistoryLoaded({required this.scans});
+  const ScanHistoryLoaded({required this.scans});
 }
 
 class ScanHistoryCubit extends Cubit<ScanHistoryState> {
-  ScanHistoryCubit() : super(ScanHistoryLoaded(scans: [])) {
+  ScanHistoryCubit(this._storage)
+      : super(const ScanHistoryLoaded(scans: [])) {
     _loadHistory();
   }
 
+  final StorageService _storage;
+
   Future<void> _loadHistory() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final jsonList = prefs.getStringList(AppConstants.scanHistoryKey) ?? [];
-      final scans = jsonList
-          .map((j) => QrCodeModel.fromJson(jsonDecode(j)))
-          .toList();
+      final scans = await _storage.loadScanHistory();
       emit(ScanHistoryLoaded(scans: scans));
     } catch (_) {
-      emit(ScanHistoryLoaded(scans: []));
+      emit(const ScanHistoryLoaded(scans: []));
     }
   }
 
   Future<void> addScan(QrCodeModel scan) async {
     try {
-      final current = state is ScanHistoryLoaded
-          ? (state as ScanHistoryLoaded).scans
-          : <QrCodeModel>[];
+      final current = switch (state) {
+        ScanHistoryLoaded(:final scans) => scans,
+      };
       final updated = [scan, ...current].take(50).toList();
-      final prefs = await SharedPreferences.getInstance();
-      final jsonList = updated.map((s) => jsonEncode(s.toJson())).toList();
-      await prefs.setStringList(AppConstants.scanHistoryKey, jsonList);
+      await _storage.saveScanHistory(updated);
       emit(ScanHistoryLoaded(scans: updated));
     } catch (_) {}
   }
 
   Future<void> clearHistory() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(AppConstants.scanHistoryKey);
-      emit(ScanHistoryLoaded(scans: []));
+      await _storage.saveScanHistory([]);
+      emit(const ScanHistoryLoaded(scans: []));
     } catch (_) {}
   }
 }

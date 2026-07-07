@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:qr_code/app/models/category_model.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:qr_studio/app/models/category_model.dart';
 
 class AppConstants {
   AppConstants._();
@@ -10,10 +10,13 @@ class AppConstants {
   static const String onboardingDoneKey = 'onboarding_done';
   static const String themeModeKey = 'theme_mode';
   static const String defaultColorKey = 'default_color';
-  static const String defaultGradientKey = 'default_gradient';
   static const String autoLaunchScannerKey = 'auto_launch_scanner';
   static const String vibrateOnScanKey = 'vibrate_on_scan';
   static const String appName = 'QR Studio';
+  static const String playStoreUrl =
+      'https://play.google.com/store/apps/details?id=com.salah.qrstudio';
+  static const String developerEmail = 's93757583@gmail.com';
+  static const String developerName = 'Salah Fathy';
 
   static const List<CategoryModel> builtInCategories = [
     CategoryModel(id: 'whatsapp', name: 'WhatsApp', icon: Icons.chat, colorValue: 0xFF33D951, imagePath: 'assets/logos/whatsapp_logo.png'),
@@ -43,14 +46,5 @@ class AppConstants {
     Color(0xFFFF6F00), Color(0xFFD50000), Color(0xFF6200EA), Color(0xFF0091EA),
   ];
 
-  static const List<Color> gradientPresets = [
-    Color(0xFF6C63FF), Color(0xFF00BFA6),
-    Color(0xFFFF6B6B), Color(0xFF4ECDC4),
-    Color(0xFFA8E063), Color(0xFF56AB2F),
-    Color(0xFFF7797D), Color(0xFFFBD786),
-    Color(0xFF667EEA), Color(0xFF764BA2),
-    Color(0xFF1A2980), Color(0xFF26D0CE),
-    Color(0xFFEB3349), Color(0xFFF45C43),
-    Color(0xFF00B4DB), Color(0xFF0083B0),
-  ];
 }
+

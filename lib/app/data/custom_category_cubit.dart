@@ -1,49 +1,48 @@
-import 'dart:convert';
-import 'package:bloc/bloc.dart';
+﻿import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_code/app/models/category_model.dart';
-import 'package:qr_code/core/constants/app_constants.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:qr_studio/app/models/category_model.dart';
+import 'package:qr_studio/core/constants/app_constants.dart';
+import 'package:qr_studio/core/services/storage_service.dart';
 
-sealed class CustomCategoryState {}
+sealed class CustomCategoryState {
+  const CustomCategoryState();
+}
 
 final class CustomCategoriesLoaded extends CustomCategoryState {
   final List<CategoryModel> categories;
-  CustomCategoriesLoaded({required this.categories});
+  const CustomCategoriesLoaded({required this.categories});
 }
 
 class CustomCategoryCubit extends Cubit<CustomCategoryState> {
-  CustomCategoryCubit() : super(CustomCategoriesLoaded(categories: [])) {
+  CustomCategoryCubit(this._storage)
+      : super(const CustomCategoriesLoaded(categories: [])) {
     _loadCustomCategories();
   }
 
+  final StorageService _storage;
+
   Future<void> _loadCustomCategories() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final jsonList =
-          prefs.getStringList(AppConstants.customCategoriesKey) ?? [];
-      final categories = jsonList
-          .map((j) => CategoryModel.fromJson(jsonDecode(j)))
-          .toList();
+      final categories = await _storage.loadCustomCategories();
       emit(CustomCategoriesLoaded(categories: categories));
     } catch (_) {
-      emit(CustomCategoriesLoaded(categories: []));
+      emit(const CustomCategoriesLoaded(categories: []));
     }
   }
 
   List<CategoryModel> getAllCategories() {
     final builtIn = AppConstants.builtInCategories;
-    final custom = state is CustomCategoriesLoaded
-        ? (state as CustomCategoriesLoaded).categories
-        : <CategoryModel>[];
+    final custom = switch (state) {
+      CustomCategoriesLoaded(:final categories) => categories,
+    };
     return [...builtIn, ...custom];
   }
 
   Future<void> addCustomCategory(String name, IconData icon, int color) async {
     try {
-      final current = state is CustomCategoriesLoaded
-          ? (state as CustomCategoriesLoaded).categories
-          : <CategoryModel>[];
+      final current = switch (state) {
+        CustomCategoriesLoaded(:final categories) => categories,
+      };
       final newCat = CategoryModel(
         id: 'custom_${DateTime.now().millisecondsSinceEpoch}',
         name: name,
@@ -52,25 +51,19 @@ class CustomCategoryCubit extends Cubit<CustomCategoryState> {
         isBuiltIn: false,
       );
       final updated = [...current, newCat];
-      await _save(updated);
+      await _storage.saveCustomCategories(updated);
       emit(CustomCategoriesLoaded(categories: updated));
     } catch (_) {}
   }
 
   Future<void> deleteCustomCategory(String id) async {
     try {
-      final current = state is CustomCategoriesLoaded
-          ? (state as CustomCategoriesLoaded).categories
-          : <CategoryModel>[];
+      final current = switch (state) {
+        CustomCategoriesLoaded(:final categories) => categories,
+      };
       final updated = current.where((c) => c.id != id).toList();
-      await _save(updated);
+      await _storage.saveCustomCategories(updated);
       emit(CustomCategoriesLoaded(categories: updated));
     } catch (_) {}
-  }
-
-  Future<void> _save(List<CategoryModel> categories) async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonList = categories.map((c) => jsonEncode(c.toJson())).toList();
-    await prefs.setStringList(AppConstants.customCategoriesKey, jsonList);
   }
 }

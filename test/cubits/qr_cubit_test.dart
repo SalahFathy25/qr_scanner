@@ -1,19 +1,22 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:bloc_test/bloc_test.dart';
-import 'package:qr_code/app/data/qr_cubit.dart';
-import 'package:qr_code/app/data/qr_state.dart';
+import 'package:qr_studio/app/data/qr_cubit.dart';
+import 'package:qr_studio/app/data/qr_state.dart';
+import 'package:qr_studio/core/services/storage_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  late StorageService storage;
 
-  setUp(() {
+  setUp(() async {
     SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    storage = StorageService(prefs);
   });
 
   blocTest<QrCubit, QrState>(
     'initializes with success state and empty codes',
-    build: () => QrCubit(),
+    build: () => QrCubit(storage),
     wait: const Duration(milliseconds: 200),
     verify: (cubit) {
       final state = cubit.state;
@@ -24,7 +27,7 @@ void main() {
 
   blocTest<QrCubit, QrState>(
     'adds a QR code correctly',
-    build: () => QrCubit(),
+    build: () => QrCubit(storage),
     wait: const Duration(milliseconds: 200),
     act: (cubit) => cubit.addQrCode(title: 'Test', data: 'test data', category: 'text'),
     verify: (cubit) {
@@ -38,7 +41,7 @@ void main() {
 
   blocTest<QrCubit, QrState>(
     'deletes a QR code and returns to empty',
-    build: () => QrCubit(),
+    build: () => QrCubit(storage),
     wait: const Duration(milliseconds: 200),
     act: (cubit) async {
       await cubit.addQrCode(title: 'Test', data: 'data', category: 'text');
@@ -53,7 +56,7 @@ void main() {
 
   blocTest<QrCubit, QrState>(
     'toggles favorite status',
-    build: () => QrCubit(),
+    build: () => QrCubit(storage),
     wait: const Duration(milliseconds: 200),
     act: (cubit) async {
       await cubit.addQrCode(title: 'Test', data: 'data', category: 'text');
@@ -68,7 +71,7 @@ void main() {
 
   blocTest<QrCubit, QrState>(
     'searches QR codes by title',
-    build: () => QrCubit(),
+    build: () => QrCubit(storage),
     wait: const Duration(milliseconds: 200),
     act: (cubit) async {
       await cubit.addQrCode(title: 'Alpha', data: 'aaa', category: 'text');
@@ -83,7 +86,7 @@ void main() {
 
   blocTest<QrCubit, QrState>(
     'filters by category',
-    build: () => QrCubit(),
+    build: () => QrCubit(storage),
     wait: const Duration(milliseconds: 200),
     act: (cubit) async {
       await cubit.addQrCode(title: 'Wifi1', data: 'wifi', category: 'wifi');
@@ -98,7 +101,7 @@ void main() {
 
   blocTest<QrCubit, QrState>(
     'updates a QR code',
-    build: () => QrCubit(),
+    build: () => QrCubit(storage),
     wait: const Duration(milliseconds: 200),
     act: (cubit) async {
       await cubit.addQrCode(title: 'Old', data: 'old', category: 'text');

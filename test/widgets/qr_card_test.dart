@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:qr_code/app/models/qr_code_model.dart';
-import 'package:qr_code/app/widgets/qr_card.dart';
+import 'package:qr_studio/app/models/qr_code_model.dart';
+import 'package:qr_studio/app/widgets/qr_card.dart';
 
 void main() {
   testWidgets('qrCard displays title and data', (tester) async {
@@ -16,7 +16,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: qrCard(
+        body: QrCardItem(
           qrCode: qrCode,
           onTap: () => tapped = true,
           onDelete: () {},
@@ -44,7 +44,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: qrCard(
+        body: QrCardItem(
           qrCode: qrCode,
           onTap: () {},
           onDelete: () {},
@@ -71,7 +71,7 @@ void main() {
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: qrCard(
+        body: QrCardItem(
           qrCode: qrCode,
           onTap: () {},
           onDelete: () {},
